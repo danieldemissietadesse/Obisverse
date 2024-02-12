@@ -5,7 +5,7 @@ import React from 'react';
 const HowItWorks: React.FC = () => {
   return (
     <section className="my-8">
-      <h2 className="text-2xl font-bold">How does it work?</h2>
+      <h2 className="text-2xl font-bold">Does it work?</h2>
       {/* List of steps */}
     </section>
   );

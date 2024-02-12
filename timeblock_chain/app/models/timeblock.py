@@ -14,7 +14,9 @@ class Timeblock:
 
     def add_prediction(self, prediction):
         if self.status == 'future':
-            self.predictions.append(prediction)
+            # Convert prediction to a numerical value if it's not already
+            prediction_value = float(prediction)
+            self.predictions.append(prediction_value)
             self.update_community_prediction()
 
     def update_community_prediction(self):
@@ -22,6 +24,7 @@ class Timeblock:
             self.community_prediction = sum(self.predictions) / len(self.predictions)
         else:
             self.community_prediction = 0
+
 
     # Method to convert the object to a dictionary for Firestore, if needed
     def to_firestore_document(self):

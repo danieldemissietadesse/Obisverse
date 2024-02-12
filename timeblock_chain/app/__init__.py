@@ -6,12 +6,13 @@ from flask_cors import CORS
 
 def create_app():
     # Initialize Firebase Admin
-    cred = credentials.Certificate("/Users/conceptualdanny/Desktop/Everything/MetaPrograms/MetaIdeas/Obisverse/timeblock_chain/app/services/service_account.json")
+    cred = credentials.Certificate("app/services/service_account.json")
+
     firebase_admin.initialize_app(cred)
 
     app = Flask(__name__)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})  # Allow all origins for /api routes"
-
+    CORS(app, resources={r"/timeblocks/*": {"origins": "*"}})
+    
     # Initialize Firestore DB
     db = firestore.client()
 
