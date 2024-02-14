@@ -199,46 +199,38 @@ class TimeblockService:
     # Inside TimeblockService class in timeblock_service.py
 
     def move_past_timeblocks(self):
-    # Get the current time in UTC
         utc_now = datetime.now(pytz.utc)
-
-        # Reference to the pastblocks collection
         pastblocks_ref = self.db.collection('pastblocks')
-        
-        # Get all timeblocks
+        bitcoindata_ref = self.db.collection('bitcoindata').document('BTCUSD')
+
         all_timeblocks = self.collection_ref.stream()
-        
-        # Begin a batch operation
+        bitcoindata_doc = bitcoindata_ref.get()
+        if not bitcoindata_doc.exists:
+            print("Bitcoin data not found.")
+            return
+
+        bitcoin_price = bitcoindata_doc.to_dict()['bitcoinPrice']
         batch = self.db.batch()
-        moved_count = 0  # Counter for moved timeblocks
+        moved_count = 0
 
         for timeblock in all_timeblocks:
             timeblock_dict = timeblock.to_dict()
             timeblock_end_time = timeblock_dict['end_time'].replace(tzinfo=pytz.utc)
 
-            # Check if the timeblock's end_time is in the past
-            if timeblock_end_time < utc_now:
-                # Update the status to 'past'
+            if timeblock_end_time < utc_now and timeblock_dict['status'] != 'past':
+                community_prediction = timeblock_dict['community_prediction']
+                accuracy = 100 - (abs(community_prediction - bitcoin_price) / bitcoin_price) * 100
                 timeblock_dict['status'] = 'past'
+                timeblock_dict['overallAccuracy'] = accuracy
 
-                # Log the action
-                print(f"Moving timeblock {timeblock.id} with end_time {timeblock_end_time} to past")
-
-                # Create a new document reference for pastblocks collection
                 new_pastblock_ref = pastblocks_ref.document(timeblock.id)
-                
-                # Set the document in pastblocks collection
                 batch.set(new_pastblock_ref, timeblock_dict)
-                
-                # Delete the document from timeblocks collection
                 batch.delete(self.collection_ref.document(timeblock.id))
-                
+
                 moved_count += 1
 
-        # Commit the batch operation
         batch.commit()
-        return f'Moved {moved_count} past timeblocks to the pastblocks collection'
-
+        return f'Moved {moved_count} past timeblocks to the pastblocks collection and updated accuracy'
     # Inside the TimeblockService class
 
     # Inside the TimeblockService class
@@ -321,7 +313,3 @@ class TimeblockService:
         thread = threading.Thread(target=run)
         thread.daemon = True
         thread.start()
-
-
-
-

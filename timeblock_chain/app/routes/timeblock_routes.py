@@ -163,13 +163,15 @@ def start_bitcoin_stream():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# This route should be called after a timeblock becomes past
-@bp.route('/<block_id>/update_accuracy', methods=['POST'])
-def update_accuracy(block_id):
+
+@bp.route('/tasks/move_past_timeblocks', methods=['GET'])
+def update_past_timeblocks_accuracy():
+    # This header is set by App Engine when calling the cron job
+    # if not request.headers.get('X-Appengine-Cron', False):
+    #  return jsonify({'error': 'Forbidden'}), 403
+    
     try:
-        accuracy = current_app.timeblock_service.update_overall_accuracy(block_id)
-        return jsonify({'message': 'Overall accuracy updated successfully', 'accuracy': accuracy}), 200
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 404
+        message = current_app.timeblock_service.move_past_timeblocks_and_update_accuracy()
+        return jsonify({'message': message}), 200
     except Exception as e:
-        return jsonify({'error': 'An error occurred while updating accuracy'}), 500
+        return jsonify({'error': str(e)}), 500

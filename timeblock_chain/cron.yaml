@@ -2,7 +2,7 @@ cron:
   - description: "update timeblock status every minute"
     url: /timeblocks/tasks/update_timeblock_status
     schedule: every 1 minutes
-
-  - description: "move past timeblocks to pastblocks collection every minute"
+    
+  - description: "Update past timeblocks and calculate accuracy"
     url: /timeblocks/tasks/move_past_timeblocks
     schedule: every 1 minutes
